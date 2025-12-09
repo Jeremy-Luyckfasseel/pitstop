@@ -1,6 +1,4 @@
 <?php
-/2025_01_XX_create_news_items_table.php
-<?php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
