@@ -3,13 +3,16 @@ import { send } from '@/routes/verification';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Form, Head, Link, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 
 import DeleteUser from '@/components/delete-user';
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { edit } from '@/routes/profile';
@@ -29,6 +32,33 @@ export default function Profile({
     status?: string;
 }) {
     const { auth } = usePage<SharedData>().props;
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setAvatarPreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const getAvatarUrl = () => {
+        if (avatarPreview) return avatarPreview;
+        if (auth.user.avatar) return `/storage/${auth.user.avatar}`;
+        return null;
+    };
+
+    const getInitials = () => {
+        return auth.user.name
+            .split(' ')
+            .map((n) => n[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -38,18 +68,45 @@ export default function Profile({
                 <div className="space-y-6">
                     <HeadingSmall
                         title="Profile information"
-                        description="Update your name and email address"
+                        description="Update your profile details and avatar"
                     />
 
                     <Form
                         {...ProfileController.update.form()}
                         options={{
                             preserveScroll: true,
+                            forceFormData: true,
                         }}
                         className="space-y-6"
                     >
                         {({ processing, recentlySuccessful, errors }) => (
                             <>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="avatar">Profile Picture</Label>
+                                    <div className="flex items-center gap-4">
+                                        <Avatar className="h-20 w-20">
+                                            <AvatarImage src={getAvatarUrl() || undefined} />
+                                            <AvatarFallback>{getInitials()}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1">
+                                            <Input
+                                                id="avatar"
+                                                type="file"
+                                                name="avatar"
+                                                accept="image/jpeg,image/jpg,image/png,image/gif"
+                                                onChange={handleAvatarChange}
+                                            />
+                                            <p className="mt-1 text-sm text-muted-foreground">
+                                                JPG, PNG or GIF. Max 2MB.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.avatar}
+                                    />
+                                </div>
+
                                 <div className="grid gap-2">
                                     <Label htmlFor="name">Name</Label>
 
@@ -70,6 +127,27 @@ export default function Profile({
                                 </div>
 
                                 <div className="grid gap-2">
+                                    <Label htmlFor="username">Username</Label>
+
+                                    <Input
+                                        id="username"
+                                        className="mt-1 block w-full"
+                                        defaultValue={auth.user.username || ''}
+                                        name="username"
+                                        autoComplete="username"
+                                        placeholder="Choose a unique username"
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                        Letters, numbers, hyphens and underscores only.
+                                    </p>
+
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.username}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
                                     <Label htmlFor="email">Email address</Label>
 
                                     <Input
@@ -79,13 +157,53 @@ export default function Profile({
                                         defaultValue={auth.user.email}
                                         name="email"
                                         required
-                                        autoComplete="username"
+                                        autoComplete="email"
                                         placeholder="Email address"
                                     />
 
                                     <InputError
                                         className="mt-2"
                                         message={errors.email}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="birthday">Birthday</Label>
+
+                                    <Input
+                                        id="birthday"
+                                        type="date"
+                                        className="mt-1 block w-full"
+                                        defaultValue={auth.user.birthday || ''}
+                                        name="birthday"
+                                        max={new Date().toISOString().split('T')[0]}
+                                    />
+
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.birthday}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="bio">Bio</Label>
+
+                                    <Textarea
+                                        id="bio"
+                                        className="mt-1 block w-full"
+                                        defaultValue={auth.user.bio || ''}
+                                        name="bio"
+                                        rows={4}
+                                        maxLength={500}
+                                        placeholder="Tell us a bit about yourself..."
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                        Max 500 characters
+                                    </p>
+
+                                    <InputError
+                                        className="mt-2"
+                                        message={errors.bio}
                                     />
                                 </div>
 
