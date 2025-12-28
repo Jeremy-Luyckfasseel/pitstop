@@ -11,9 +11,9 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { type NavItem, type SharedData } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
+import { BookOpen, Folder, LayoutGrid, Newspaper, ShieldCheck } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -21,6 +21,11 @@ const mainNavItems: NavItem[] = [
         title: 'Dashboard',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'News',
+        href: '/news',
+        icon: Newspaper,
     },
 ];
 
@@ -38,6 +43,23 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { auth } = usePage<SharedData>().props;
+    
+    const adminNavItems: NavItem[] = auth.user.is_admin
+        ? [
+              {
+                  title: 'Admin Dashboard',
+                  href: '/admin/dashboard',
+                  icon: ShieldCheck,
+              },
+              {
+                  title: 'Manage News',
+                  href: '/admin/news',
+                  icon: Newspaper,
+              },
+          ]
+        : [];
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -54,6 +76,9 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                {adminNavItems.length > 0 && (
+                    <NavMain items={adminNavItems} />
+                )}
             </SidebarContent>
 
             <SidebarFooter>
