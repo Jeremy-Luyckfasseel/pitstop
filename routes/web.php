@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\NewsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -9,6 +10,10 @@ Route::get('/', function () {
         'canRegister' => Features::enabled(Features::registration()),
     ]);
 })->name('home');
+
+// Public news routes
+Route::get('/news', [NewsController::class, 'index'])->name('news.index');
+Route::get('/news/{newsItem}', [NewsController::class, 'show'])->name('news.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
@@ -23,7 +28,14 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
         return Inertia::render('admin/dashboard');
     })->name('dashboard');
     
-    // News management routes will be added here
+    // News management routes
+    Route::get('/news', [NewsController::class, 'adminIndex'])->name('news.index');
+    Route::get('/news/create', [NewsController::class, 'create'])->name('news.create');
+    Route::post('/news', [NewsController::class, 'store'])->name('news.store');
+    Route::get('/news/{newsItem}/edit', [NewsController::class, 'edit'])->name('news.edit');
+    Route::put('/news/{newsItem}', [NewsController::class, 'update'])->name('news.update');
+    Route::delete('/news/{newsItem}', [NewsController::class, 'destroy'])->name('news.destroy');
+    
     // FAQ management routes will be added here
     // User management routes will be added here
 });
