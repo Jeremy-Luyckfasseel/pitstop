@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\FaqCategoryController;
+use App\Http\Controllers\Admin\FaqController as AdminFaqController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\FaqController;
 use App\Http\Controllers\NewsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -15,6 +19,13 @@ Route::get('/', function () {
 Route::get('/news', [NewsController::class, 'index'])->name('news.index');
 Route::get('/news/{newsItem}', [NewsController::class, 'show'])->name('news.show');
 
+// Public FAQ route
+Route::get('/faq', [FaqController::class, 'index'])->name('faq.index');
+
+// Contact routes
+Route::get('/contact', [ContactController::class, 'create'])->name('contact.create');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
@@ -27,7 +38,7 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     Route::get('/dashboard', function () {
         return Inertia::render('admin/dashboard');
     })->name('dashboard');
-    
+
     // News management routes
     Route::get('/news', [NewsController::class, 'adminIndex'])->name('news.index');
     Route::get('/news/create', [NewsController::class, 'create'])->name('news.create');
@@ -35,9 +46,14 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     Route::get('/news/{newsItem}/edit', [NewsController::class, 'edit'])->name('news.edit');
     Route::put('/news/{newsItem}', [NewsController::class, 'update'])->name('news.update');
     Route::delete('/news/{newsItem}', [NewsController::class, 'destroy'])->name('news.destroy');
-    
-    // FAQ management routes will be added here
+
+    // FAQ Category management routes
+    Route::resource('faq-categories', FaqCategoryController::class);
+
+    // FAQ management routes
+    Route::resource('faqs', AdminFaqController::class);
+
     // User management routes will be added here
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';
