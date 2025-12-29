@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\ProfileUpdateRequest;
+use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -30,21 +32,14 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
-        $validated = $request->validated();
+        $data = $request->safe()->except('avatar');
 
-        // Handle avatar upload
         if ($request->hasFile('avatar')) {
-            // Delete old avatar if exists
-            if ($user->avatar && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->avatar)) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
-            }
-
-            // Store new avatar
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $validated['avatar'] = $path;
+            $this->deleteOldAvatar($user);
+            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
         }
 
-        $user->fill($validated);
+        $user->fill($data);
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
@@ -75,4 +70,15 @@ class ProfileController extends Controller
 
         return redirect('/');
     }
+
+    /**
+     * Delete the old avatar if it exists.
+     */
+    private function deleteOldAvatar(User $user): void
+    {
+        if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+    }
 }
+
