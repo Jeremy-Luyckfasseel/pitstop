@@ -52,7 +52,7 @@ export default function AdminDashboard() {
                         </CardContent>
                     </Card>
 
-                    <Card className="opacity-50">
+                    <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
                                 <CardTitle>FAQ Management</CardTitle>
@@ -62,9 +62,12 @@ export default function AdminDashboard() {
                                 Manage frequently asked questions
                             </CardDescription>
                         </CardHeader>
-                        <CardContent>
-                            <Button disabled className="w-full">
-                                Coming Soon
+                        <CardContent className="space-y-2">
+                            <Button asChild className="w-full">
+                                <Link href="/admin/faqs">Manage FAQs</Link>
+                            </Button>
+                            <Button asChild variant="outline" className="w-full">
+                                <Link href="/admin/faq-categories">Manage Categories</Link>
                             </Button>
                         </CardContent>
                     </Card>
@@ -117,8 +120,13 @@ export default function AdminDashboard() {
                                 Create News Article
                             </Link>
                         </Button>
-                        <Button variant="outline" disabled>
-                            Create FAQ
+                        <Button variant="outline" asChild>
+                            <Link href="/admin/faqs/create">Create FAQ</Link>
+                        </Button>
+                        <Button variant="outline" asChild>
+                            <Link href="/admin/faq-categories/create">
+                                Create FAQ Category
+                            </Link>
                         </Button>
                         <Button variant="outline" disabled>
                             Manage Users
@@ -129,3 +137,4 @@ export default function AdminDashboard() {
         </AppLayout>
     );
 }
+
