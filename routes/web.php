@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\ThreadController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -35,10 +36,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // Forum routes - requires authentication
 Route::middleware(['auth'])->group(function () {
-    Route::resource('forum', ThreadController::class);
+    // Thread routes - use 'thread' parameter name for model binding
+    Route::resource('forum', ThreadController::class)->parameters([
+        'forum' => 'thread',
+    ]);
     Route::post('forum/{thread}/pin', [ThreadController::class, 'pin'])
         ->name('forum.pin')
         ->middleware('is_admin');
+
+    // Reply routes
+    Route::post('forum/{thread}/replies', [ReplyController::class, 'store'])
+        ->name('replies.store');
+    Route::put('replies/{reply}', [ReplyController::class, 'update'])
+        ->name('replies.update');
+    Route::delete('replies/{reply}', [ReplyController::class, 'destroy'])
+        ->name('replies.destroy');
 });
 
 // Admin routes - requires authentication and admin privileges
