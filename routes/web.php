@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\ThreadController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -32,6 +33,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 });
 
+// Forum routes - requires authentication
+Route::middleware(['auth'])->group(function () {
+    Route::resource('forum', ThreadController::class);
+    Route::post('forum/{thread}/pin', [ThreadController::class, 'pin'])
+        ->name('forum.pin')
+        ->middleware('is_admin');
+});
+
 // Admin routes - requires authentication and admin privileges
 Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
     // Admin dashboard
@@ -57,3 +66,4 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
 });
 
 require __DIR__ . '/settings.php';
+
