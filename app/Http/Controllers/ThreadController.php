@@ -67,8 +67,31 @@ class ThreadController extends Controller
      */
     public function show(Thread $thread): Response
     {
+        $thread->load(['author', 'replies.author']);
+        $user = request()->user();
+
+        // Transform replies to include permission flags
+        $repliesWithPermissions = $thread->replies->map(function ($reply) use ($user) {
+            return [
+                'id' => $reply->id,
+                'body' => $reply->body,
+                'created_at' => $reply->created_at,
+                'author' => $reply->author,
+                'canEdit' => $user && ($user->is_admin || $user->id === $reply->user_id),
+                'canDelete' => $user && ($user->is_admin || $user->id === $reply->user_id),
+            ];
+        });
+
         return Inertia::render('forum/show', [
-            'thread' => $thread->load(['author', 'replies.author']),
+            'thread' => [
+                'id' => $thread->id,
+                'title' => $thread->title,
+                'body' => $thread->body,
+                'is_pinned' => $thread->is_pinned,
+                'created_at' => $thread->created_at,
+                'author' => $thread->author,
+                'replies' => $repliesWithPermissions,
+            ],
             'canEdit' => $this->userCan('update', $thread),
             'canDelete' => $this->userCan('delete', $thread),
             'canPin' => $this->userCan('pin', $thread),
