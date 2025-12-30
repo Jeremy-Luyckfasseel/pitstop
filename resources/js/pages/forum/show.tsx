@@ -1,4 +1,4 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import {
     ArrowLeft,
     Calendar,
@@ -6,10 +6,11 @@ import {
     MessageSquare,
     Pin,
     PinOff,
+    Send,
     Trash2,
-    User,
+    X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { FormEventHandler, useState } from 'react';
 
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Badge } from '@/components/ui/badge';
@@ -32,7 +33,9 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import InputError from '@/components/input-error';
 import AppLayout from '@/layouts/app-layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -58,6 +61,8 @@ interface Reply {
     body: string;
     created_at: string;
     author: Author;
+    canEdit: boolean;
+    canDelete: boolean;
 }
 
 interface Thread {
@@ -85,6 +90,18 @@ export default function ThreadShow({
 }: Props) {
     const { auth } = usePage<SharedData>().props;
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [deleteReplyId, setDeleteReplyId] = useState<number | null>(null);
+    const [editingReplyId, setEditingReplyId] = useState<number | null>(null);
+
+    // Reply form
+    const replyForm = useForm({
+        body: '',
+    });
+
+    // Edit reply form
+    const editForm = useForm({
+        body: '',
+    });
 
     const formatDate = (date: string) => {
         return new Date(date).toLocaleDateString('en-US', {
@@ -105,12 +122,49 @@ export default function ThreadShow({
             .slice(0, 2);
     };
 
-    const handleDelete = () => {
+    const handleDeleteThread = () => {
         router.delete(`/forum/${thread.id}`);
     };
 
     const handlePin = () => {
         router.post(`/forum/${thread.id}/pin`);
+    };
+
+    const submitReply: FormEventHandler = (e) => {
+        e.preventDefault();
+        replyForm.post(`/forum/${thread.id}/replies`, {
+            onSuccess: () => replyForm.reset(),
+        });
+    };
+
+    const startEditReply = (reply: Reply) => {
+        setEditingReplyId(reply.id);
+        editForm.setData('body', reply.body);
+    };
+
+    const cancelEditReply = () => {
+        setEditingReplyId(null);
+        editForm.reset();
+    };
+
+    const submitEditReply: FormEventHandler = (e) => {
+        e.preventDefault();
+        if (editingReplyId) {
+            editForm.put(`/replies/${editingReplyId}`, {
+                onSuccess: () => {
+                    setEditingReplyId(null);
+                    editForm.reset();
+                },
+            });
+        }
+    };
+
+    const handleDeleteReply = () => {
+        if (deleteReplyId) {
+            router.delete(`/replies/${deleteReplyId}`, {
+                onSuccess: () => setDeleteReplyId(null),
+            });
+        }
     };
 
     return (
@@ -274,23 +328,96 @@ export default function ThreadShow({
                                                     </p>
                                                 </div>
                                             </div>
-                                            <Badge variant="outline">
-                                                #{index + 1}
-                                            </Badge>
+                                            <div className="flex items-center gap-2">
+                                                <Badge variant="outline">
+                                                    #{index + 1}
+                                                </Badge>
+                                                {reply.canEdit && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8"
+                                                        onClick={() =>
+                                                            startEditReply(
+                                                                reply
+                                                            )
+                                                        }
+                                                    >
+                                                        <Edit className="h-4 w-4" />
+                                                    </Button>
+                                                )}
+                                                {reply.canDelete && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8"
+                                                        onClick={() =>
+                                                            setDeleteReplyId(
+                                                                reply.id
+                                                            )
+                                                        }
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                )}
+                                            </div>
                                         </div>
                                     </CardHeader>
                                     <CardContent>
-                                        <p className="whitespace-pre-wrap">
-                                            {reply.body}
-                                        </p>
+                                        {editingReplyId === reply.id ? (
+                                            <form
+                                                onSubmit={submitEditReply}
+                                                className="space-y-4"
+                                            >
+                                                <Textarea
+                                                    value={editForm.data.body}
+                                                    onChange={(e) =>
+                                                        editForm.setData(
+                                                            'body',
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    rows={4}
+                                                />
+                                                <InputError
+                                                    message={
+                                                        editForm.errors.body
+                                                    }
+                                                />
+                                                <div className="flex gap-2">
+                                                    <Button
+                                                        type="submit"
+                                                        size="sm"
+                                                        disabled={
+                                                            editForm.processing
+                                                        }
+                                                    >
+                                                        Save
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={cancelEditReply}
+                                                    >
+                                                        <X className="mr-1 h-4 w-4" />
+                                                        Cancel
+                                                    </Button>
+                                                </div>
+                                            </form>
+                                        ) : (
+                                            <p className="whitespace-pre-wrap">
+                                                {reply.body}
+                                            </p>
+                                        )}
                                     </CardContent>
                                 </Card>
                             ))}
                         </div>
                     )}
 
-                    {/* Reply form placeholder - will be implemented in Day 4 afternoon */}
-                    {auth.user && (
+                    {/* Reply form */}
+                    {auth.user ? (
                         <Card>
                             <CardHeader>
                                 <CardTitle className="text-lg">
@@ -298,8 +425,56 @@ export default function ThreadShow({
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-sm text-muted-foreground">
-                                    Reply functionality coming soon...
+                                <form
+                                    onSubmit={submitReply}
+                                    className="space-y-4"
+                                >
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="reply-body">
+                                            Your Reply
+                                        </Label>
+                                        <Textarea
+                                            id="reply-body"
+                                            value={replyForm.data.body}
+                                            onChange={(e) =>
+                                                replyForm.setData(
+                                                    'body',
+                                                    e.target.value
+                                                )
+                                            }
+                                            rows={4}
+                                            placeholder="Write your reply here..."
+                                        />
+                                        <p className="text-sm text-muted-foreground">
+                                            {replyForm.data.body.length}/5,000
+                                            characters
+                                        </p>
+                                        <InputError
+                                            message={replyForm.errors.body}
+                                        />
+                                    </div>
+                                    <Button
+                                        type="submit"
+                                        disabled={replyForm.processing}
+                                    >
+                                        <Send className="mr-2 h-4 w-4" />
+                                        Post Reply
+                                    </Button>
+                                </form>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <Card>
+                            <CardContent className="py-6 text-center">
+                                <p className="text-muted-foreground">
+                                    Please{' '}
+                                    <Link
+                                        href="/login"
+                                        className="text-primary underline"
+                                    >
+                                        log in
+                                    </Link>{' '}
+                                    to post a reply.
                                 </p>
                             </CardContent>
                         </Card>
@@ -307,7 +482,7 @@ export default function ThreadShow({
                 </div>
             </div>
 
-            {/* Delete confirmation dialog */}
+            {/* Delete thread confirmation dialog */}
             <AlertDialog
                 open={showDeleteDialog}
                 onOpenChange={setShowDeleteDialog}
@@ -315,7 +490,7 @@ export default function ThreadShow({
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>
-                            Are you absolutely sure?
+                            Delete this thread?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
                             This action cannot be undone. This will permanently
@@ -324,7 +499,29 @@ export default function ThreadShow({
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete}>
+                        <AlertDialogAction onClick={handleDeleteThread}>
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Delete reply confirmation dialog */}
+            <AlertDialog
+                open={deleteReplyId !== null}
+                onOpenChange={() => setDeleteReplyId(null)}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete this reply?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently
+                            delete this reply.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteReply}>
                             Delete
                         </AlertDialogAction>
                     </AlertDialogFooter>
