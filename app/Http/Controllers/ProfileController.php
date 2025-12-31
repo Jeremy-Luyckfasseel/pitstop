@@ -33,6 +33,14 @@ class ProfileController extends Controller
             ? $user->newsItems()->latest()->take(3)->get()
             : collect();
 
+        // Get favorite threads (last 5)
+        $favoriteThreads = $user->favoriteThreads()
+            ->with('author')
+            ->withCount('replies')
+            ->latest('thread_user_favorites.created_at')
+            ->take(5)
+            ->get();
+
         return Inertia::render('profile/show', [
             'profileUser' => [
                 'id' => $user->id,
@@ -47,6 +55,7 @@ class ProfileController extends Controller
             'recentThreads' => $recentThreads,
             'recentReplies' => $recentReplies,
             'recentNews' => $recentNews,
+            'favoriteThreads' => $favoriteThreads,
             'isOwner' => request()->user()?->id === $user->id,
         ]);
     }
