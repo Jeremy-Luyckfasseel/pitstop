@@ -82,6 +82,9 @@ class ThreadController extends Controller
             ];
         });
 
+        // Check if current user has favorited this thread
+        $isFavorited = $user ? $user->favoriteThreads()->where('thread_id', $thread->id)->exists() : false;
+
         return Inertia::render('forum/show', [
             'thread' => [
                 'id' => $thread->id,
@@ -95,6 +98,7 @@ class ThreadController extends Controller
             'canEdit' => $this->userCan('update', $thread),
             'canDelete' => $this->userCan('delete', $thread),
             'canPin' => $this->userCan('pin', $thread),
+            'isFavorited' => $isFavorited,
         ]);
     }
 
@@ -150,6 +154,24 @@ class ThreadController extends Controller
         $status = $thread->is_pinned ? 'pinned' : 'unpinned';
 
         return back()->with('success', "Thread {$status} successfully.");
+    }
+
+    /**
+     * Toggle favorite status for a thread.
+     */
+    public function toggleFavorite(Thread $thread): RedirectResponse
+    {
+        $user = request()->user();
+
+        if ($user->favoriteThreads()->where('thread_id', $thread->id)->exists()) {
+            $user->favoriteThreads()->detach($thread->id);
+            $message = 'Thread removed from favorites.';
+        } else {
+            $user->favoriteThreads()->attach($thread->id);
+            $message = 'Thread added to favorites.';
+        }
+
+        return back()->with('success', $message);
     }
 
     /**
