@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { Calendar, Edit, MessageSquare, Newspaper, User } from 'lucide-react';
+import { Calendar, Edit, Heart, MessageSquare, Newspaper, User } from 'lucide-react';
 
 import { type BreadcrumbItem } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -48,11 +48,22 @@ interface NewsItem {
     created_at: string;
 }
 
+interface FavoriteThread {
+    id: number;
+    title: string;
+    replies_count: number;
+    author: {
+        name: string;
+        username: string;
+    };
+}
+
 interface Props {
     profileUser: ProfileUser;
     recentThreads: Thread[];
     recentReplies: Reply[];
     recentNews: NewsItem[];
+    favoriteThreads: FavoriteThread[];
     isOwner: boolean;
 }
 
@@ -61,6 +72,7 @@ export default function ProfileShow({
     recentThreads,
     recentReplies,
     recentNews,
+    favoriteThreads,
     isOwner,
 }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -278,6 +290,41 @@ export default function ProfileShow({
                                                 {formatShortDate(
                                                     news.created_at
                                                 )}
+                                            </p>
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* Favorite Threads */}
+                {favoriteThreads.length > 0 && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Heart className="h-5 w-5" />
+                                Favorite Threads
+                            </CardTitle>
+                            <CardDescription>
+                                Threads bookmarked by {profileUser.name}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ul className="space-y-3">
+                                {favoriteThreads.map((thread) => (
+                                    <li key={thread.id}>
+                                        <Link
+                                            href={`/forum/${thread.id}`}
+                                            className="group block"
+                                        >
+                                            <p className="font-medium group-hover:underline">
+                                                {thread.title}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                by {thread.author.name} · {thread.replies_count}{' '}
+                                                {thread.replies_count === 1 ? 'reply' : 'replies'}
                                             </p>
                                         </Link>
                                     </li>
