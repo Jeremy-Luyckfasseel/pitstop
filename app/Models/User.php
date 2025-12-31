@@ -55,4 +55,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Reply::class);
     }
+
+    public function favoriteThreads()
+    {
+        return $this->belongsToMany(Thread::class, 'thread_user_favorites')
+            ->withTimestamps();
+    }
 }
