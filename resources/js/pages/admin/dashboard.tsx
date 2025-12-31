@@ -1,7 +1,16 @@
 import { Head, Link } from '@inertiajs/react';
-import { Newspaper, Users, MessageSquare, HelpCircle } from 'lucide-react';
+import {
+    HelpCircle,
+    MessageSquare,
+    Newspaper,
+    TrendingUp,
+    Users,
+} from 'lucide-react';
 
 import { type BreadcrumbItem } from '@/types';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -9,7 +18,6 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -19,7 +27,45 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function AdminDashboard() {
+interface Stats {
+    totalUsers: number;
+    totalNews: number;
+    totalThreads: number;
+    totalReplies: number;
+}
+
+interface RecentUser {
+    id: number;
+    name: string;
+    username: string;
+    email: string;
+    is_admin: boolean;
+    created_at: string;
+}
+
+interface Props {
+    stats: Stats;
+    recentUsers: RecentUser[];
+}
+
+export default function AdminDashboard({ stats, recentUsers }: Props) {
+    const getInitials = (name: string) => {
+        return name
+            .split(' ')
+            .map((n) => n[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
+    };
+
+    const formatDate = (date: string) => {
+        return new Date(date).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+        });
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Admin Dashboard" />
@@ -34,7 +80,76 @@ export default function AdminDashboard() {
                     </p>
                 </div>
 
+                {/* Statistics Cards */}
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Total Users
+                            </CardTitle>
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {stats.totalUsers}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Registered accounts
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                News Articles
+                            </CardTitle>
+                            <Newspaper className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {stats.totalNews}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Published articles
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Forum Threads
+                            </CardTitle>
+                            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {stats.totalThreads}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Discussion topics
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Forum Replies
+                            </CardTitle>
+                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {stats.totalReplies}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Community engagement
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {/* Management Cards */}
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
@@ -66,13 +181,19 @@ export default function AdminDashboard() {
                             <Button asChild className="w-full">
                                 <Link href="/admin/faqs">Manage FAQs</Link>
                             </Button>
-                            <Button asChild variant="outline" className="w-full">
-                                <Link href="/admin/faq-categories">Manage Categories</Link>
+                            <Button
+                                asChild
+                                variant="outline"
+                                className="w-full"
+                            >
+                                <Link href="/admin/faq-categories">
+                                    Manage Categories
+                                </Link>
                             </Button>
                         </CardContent>
                     </Card>
 
-                    <Card className="opacity-50">
+                    <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
                                 <CardTitle>User Management</CardTitle>
@@ -83,30 +204,81 @@ export default function AdminDashboard() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Button disabled className="w-full">
-                                Coming Soon
+                            <Button asChild className="w-full">
+                                <Link href="/admin/users">Manage Users</Link>
                             </Button>
                         </CardContent>
                     </Card>
 
-                    <Card className="opacity-50">
+                    <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
-                                <CardTitle>Forum Management</CardTitle>
+                                <CardTitle>Forum</CardTitle>
                                 <MessageSquare className="h-8 w-8 text-muted-foreground" />
                             </div>
                             <CardDescription>
-                                Manage forum threads and replies
+                                View and moderate forum discussions
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Button disabled className="w-full">
-                                Coming Soon
+                            <Button asChild className="w-full">
+                                <Link href="/forum">Go to Forum</Link>
                             </Button>
                         </CardContent>
                     </Card>
                 </div>
 
+                {/* Recent Registrations */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Recent Registrations</CardTitle>
+                        <CardDescription>
+                            Newest members who joined the community
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-4">
+                            {recentUsers.map((user) => (
+                                <div
+                                    key={user.id}
+                                    className="flex items-center justify-between"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <Avatar className="h-9 w-9">
+                                            <AvatarFallback>
+                                                {getInitials(user.name)}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <Link
+                                                href={`/profile/${user.username}`}
+                                                className="font-medium hover:underline"
+                                            >
+                                                {user.name}
+                                            </Link>
+                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                                <span>@{user.username}</span>
+                                                {user.is_admin && (
+                                                    <Badge
+                                                        variant="default"
+                                                        className="text-xs"
+                                                    >
+                                                        Admin
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                        {formatDate(user.created_at)}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Quick Actions */}
                 <Card>
                     <CardHeader>
                         <CardTitle>Quick Actions</CardTitle>
@@ -128,8 +300,8 @@ export default function AdminDashboard() {
                                 Create FAQ Category
                             </Link>
                         </Button>
-                        <Button variant="outline" disabled>
-                            Manage Users
+                        <Button variant="outline" asChild>
+                            <Link href="/admin/users">Manage Users</Link>
                         </Button>
                     </CardContent>
                 </Card>
@@ -137,4 +309,3 @@ export default function AdminDashboard() {
         </AppLayout>
     );
 }
-
