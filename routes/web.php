@@ -1,10 +1,13 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FaqCategoryController;
 use App\Http\Controllers\Admin\FaqController as AdminFaqController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\ThreadController;
 use Illuminate\Support\Facades\Route;
@@ -34,6 +37,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 });
 
+// Public profile route (accessible by logged-in users)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile/{user:username}', [ProfileController::class, 'show'])
+        ->name('profile.show');
+});
+
 // Forum routes - requires authentication
 Route::middleware(['auth'])->group(function () {
     // Thread routes - use 'thread' parameter name for model binding
@@ -55,10 +64,8 @@ Route::middleware(['auth'])->group(function () {
 
 // Admin routes - requires authentication and admin privileges
 Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Admin dashboard
-    Route::get('/dashboard', function () {
-        return Inertia::render('admin/dashboard');
-    })->name('dashboard');
+    // Admin dashboard with statistics
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // News management routes
     Route::get('/news', [NewsController::class, 'adminIndex'])->name('news.index');
@@ -74,8 +81,12 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     // FAQ management routes
     Route::resource('faqs', AdminFaqController::class);
 
-    // User management routes will be added here
+    // User management routes
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users/{user}/promote', [UserController::class, 'promote'])->name('users.promote');
+    Route::post('/users/{user}/demote', [UserController::class, 'demote'])->name('users.demote');
 });
 
 require __DIR__ . '/settings.php';
+
 
