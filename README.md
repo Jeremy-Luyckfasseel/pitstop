@@ -1,84 +1,169 @@
-Pitstop 🏎️
-Pitstop is een dynamisch forumplatform voor Formule 1-fans, gebouwd met Laravel, Inertia.js en React.
+# Pitstop 🏎️ - F1 Forum & News Platform
 
-✨ Features
-Dit project voldoet aan de volgende functionele vereisten:
+A dynamic forum platform for Formula 1 fans, built with Laravel, Inertia.js, and React.
 
-Basis Requirements
-Authenticatie: Registreren, Inloggen, Wachtwoord resetten (via Laravel Fortify).
+## ✨ Features Implemented
 
-Rollen: Systeem voor Admin vs. Gebruiker.
+### Authentication & Users
 
-Nieuws: CRUD-systeem voor admins; gebruikers kunnen nieuws lezen (met afbeeldingen).
+- User registration with email verification
+- Login with "Remember Me" functionality
+- Password reset via email
+- Two-Factor Authentication (2FA) support
+- User roles (Admin / Regular User)
+- Public profiles with avatars and bio
+- Profile management with avatar upload
 
-Profielen: Aanpasbare profielen met avatar upload en bio.
+### Content Management
 
-FAQ: Categorieën en vragen (beheerbaar door admin, leesbaar voor iedereen).
+- **News System**: Admin CRUD with images, public viewing
+- **FAQ System**: Categories with ordered questions, accordion display
+- **Contact Form**: Email notifications to admin
 
-Contact: Contactformulier dat emails verstuurt naar de admin.
+### Forum System
 
-Extra Features (Pitstop Forum)
-Topics: Gebruikers kunnen discussies starten over F1.
+- Discussion threads with rich content
+- Reply system with inline editing
+- Thread pinning (admin only)
+- Sorting by newest/most replies
+- Thread favorites (bookmark threads)
+- Author information display
 
-Replies: Gebruikers kunnen reageren op topics.
+### Admin Panel
 
-React Frontend: Volledige Single Page Application (SPA) ervaring met Inertia.js.
+- Dashboard with real-time statistics
+- User management (promote/demote admins)
+- News article management
+- FAQ and category management
 
-🚀 Installatie & Lokaal draaien
-Volg deze stappen om het project werkend te krijgen:
+---
 
-Vereisten:
+## 🚀 Setup Instructions
 
-PHP 8.2+
+### Requirements
 
-Node.js & NPM
+- PHP 8.2+
+- Composer
+- Node.js & NPM
+- SQLite (default) or MySQL/PostgreSQL
 
-SQLite (standaard ingeschakeld)
+### Installation
 
-PowerShell
-
-# 1. Clone de repository
+```bash
+# 1. Clone the repository
 git clone https://github.com/Jeremy-Luyckfasseel/pitstop.git
 cd pitstop
 
-# 2. Installeer dependencies
+# 2. Install PHP dependencies
 composer install
+
+# 3. Install Node dependencies
 npm install
 
-# 3. Environment setup
+# 4. Environment setup
 cp .env.example .env
 php artisan key:generate
 
-# 4. Database setup (Zorg dat de database.sqlite file bestaat of laat artisan dit doen)
-# Dit commando maakt de tabellen aan EN vult de dummy data + admin account
+# 5. Database setup (creates tables and seeds data)
 php artisan migrate:fresh --seed
 
-# 5. Start de servers
-# Je hebt twee terminals nodig (of gebruik een tool als Herd/Laragon)
-npm run dev
+# 6. Link storage for file uploads
+php artisan storage:link
+
+# 7. Build frontend assets
+npm run build
+
+# 8. Start the development server
 php artisan serve
-Ga naar http://localhost:8000 (of de URL die je server aangeeft).
+```
 
-📚 Bronvermelding
-Voor dit project is gebruik gemaakt van de volgende bronnen:
+Visit `http://localhost:8000` or your configured URL.
 
-Laravel Documentatie: Voor Eloquent relaties en Controllers.
+---
 
-Inertia.js Documentatie: Voor de React integratie en routing.
+## 📊 Database Relationships
 
-Tailwind UI / CSS: Voor de styling van componenten.
+```
+User ──┬── hasMany ──> NewsItem
+       ├── hasMany ──> Thread
+       ├── hasMany ──> Reply
+       └── belongsToMany ──> Thread (favorites)
 
-Laravel Breeze/Starter Kit: Als basis voor de authenticatie scaffolding.
+Thread ──┬── belongsTo ──> User (author)
+         ├── hasMany ──> Reply
+         └── belongsToMany ──> User (favoritedBy)
 
-AI Assistentie: GitHub Copilot is gebruikt als pair-programmer voor debugging en code-suggesties.
+Reply ──┬── belongsTo ──> User (author)
+        └── belongsTo ──> Thread
 
-🛠️ Technische Stack
-Framework: Laravel 11
+FaqCategory ──── hasMany ──> Faq
+```
 
-Frontend: React + TypeScript (via Inertia.js)
+---
 
-Database: SQLite
+## 🛠️ Technologies Used
 
-Styling: Tailwind CSS
+| Layer              | Technology            |
+| ------------------ | --------------------- |
+| **Framework**      | Laravel 11            |
+| **Frontend**       | React 18 + TypeScript |
+| **SPA Bridge**     | Inertia.js            |
+| **UI Components**  | shadcn/ui             |
+| **Styling**        | Tailwind CSS          |
+| **Database**       | SQLite (default)      |
+| **Authentication** | Laravel Fortify       |
+| **Testing**        | Pest PHP              |
 
-Testing: Pest PHP
+---
+
+## 📚 Source Credits
+
+- [Laravel Documentation](https://laravel.com/docs) - Eloquent, Controllers, Policies
+- [Inertia.js Documentation](https://inertiajs.com) - React integration and routing
+- [shadcn/ui](https://ui.shadcn.com) - UI component library
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
+- [Laravel Breeze](https://github.com/laravel/breeze) - Authentication scaffolding base
+- AI Assistance: GitHub Copilot and Claude used for debugging and code suggestions
+
+---
+
+## 📁 Project Structure
+
+```
+app/
+├── Http/
+│   ├── Controllers/       # Route controllers
+│   ├── Requests/          # Form validation
+│   └── Middleware/        # Auth and admin checks
+├── Models/                # Eloquent models
+├── Policies/              # Authorization policies
+└── Mail/                  # Mailable classes
+
+resources/js/
+├── components/            # React UI components
+├── layouts/               # App and auth layouts
+└── pages/                 # Inertia page components
+    ├── admin/             # Admin pages
+    ├── forum/             # Forum pages
+    ├── news/              # News pages
+    ├── profile/           # Profile pages
+    └── settings/          # User settings
+```
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run PHP tests
+php artisan test
+
+# Run with coverage
+php artisan test --coverage
+```
+
+---
+
+## 📄 License
+
+This project is created for educational purposes as part of the EHB curriculum.
