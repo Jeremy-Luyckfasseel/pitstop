@@ -32,8 +32,9 @@ Route::get('/contact', [ContactController::class, 'create'])->name('contact.crea
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Redirect old dashboard to forum
     Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
+        return redirect('/forum');
     })->name('dashboard');
 });
 
@@ -52,6 +53,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('forum/{thread}/pin', [ThreadController::class, 'pin'])
         ->name('forum.pin')
         ->middleware('is_admin');
+    Route::post('forum/{thread}/favorite', [ThreadController::class, 'toggleFavorite'])
+        ->name('forum.favorite');
+
 
     // Reply routes
     Route::post('forum/{thread}/replies', [ReplyController::class, 'store'])
