@@ -32,4 +32,10 @@ class Thread extends Model
     {
         return $this->hasMany(Reply::class);
     }
+
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(User::class, 'thread_user_favorites')
+            ->withTimestamps();
+    }
 }
