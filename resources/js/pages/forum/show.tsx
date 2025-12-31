@@ -3,6 +3,7 @@ import {
     ArrowLeft,
     Calendar,
     Edit,
+    Heart,
     MessageSquare,
     Pin,
     PinOff,
@@ -80,6 +81,7 @@ interface Props {
     canEdit: boolean;
     canDelete: boolean;
     canPin: boolean;
+    isFavorited: boolean;
 }
 
 export default function ThreadShow({
@@ -87,6 +89,7 @@ export default function ThreadShow({
     canEdit,
     canDelete,
     canPin,
+    isFavorited,
 }: Props) {
     const { auth } = usePage<SharedData>().props;
     const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -128,6 +131,10 @@ export default function ThreadShow({
 
     const handlePin = () => {
         router.post(`/forum/${thread.id}/pin`);
+    };
+
+    const handleFavorite = () => {
+        router.post(`/forum/${thread.id}/favorite`);
     };
 
     const submitReply: FormEventHandler = (e) => {
@@ -181,6 +188,16 @@ export default function ThreadShow({
                         </Link>
                     </Button>
                     <div className="flex items-center gap-2">
+                        <Button
+                            variant={isFavorited ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={handleFavorite}
+                        >
+                            <Heart
+                                className={`mr-2 h-4 w-4 ${isFavorited ? 'fill-current' : ''}`}
+                            />
+                            {isFavorited ? 'Favorited' : 'Favorite'}
+                        </Button>
                         {canPin && (
                             <Button
                                 variant="outline"
