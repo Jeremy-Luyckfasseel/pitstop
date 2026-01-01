@@ -122,7 +122,14 @@ export default function UsersIndex({ users }: Props) {
                             Manage user accounts and permissions
                         </p>
                     </div>
-                    <Users className="h-10 w-10 text-muted-foreground" />
+                    <div className="flex items-center gap-4">
+                        <Button asChild>
+                            <Link href="/admin/users/create">
+                                Create User
+                            </Link>
+                        </Button>
+                        <Users className="h-10 w-10 text-muted-foreground" />
+                    </div>
                 </div>
 
                 <Card>
