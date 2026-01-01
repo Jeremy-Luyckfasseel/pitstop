@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\StoreUserRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -30,6 +31,31 @@ class UserController extends Controller
         return Inertia::render('admin/users/index', [
             'users' => $users,
         ]);
+    }
+
+    /**
+     * Show the form for creating a new user.
+     */
+    public function create(): Response
+    {
+        return Inertia::render('admin/users/create');
+    }
+
+    /**
+     * Store a newly created user in storage.
+     */
+    public function store(StoreUserRequest $request): RedirectResponse
+    {
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => $request->password,
+            'is_admin' => $request->boolean('is_admin'),
+            'email_verified_at' => now(), // Auto-verify since admin created
+        ]);
+
+        return to_route('admin.users.index')
+            ->with('success', 'User created successfully.');
     }
 
     /**
@@ -66,3 +92,4 @@ class UserController extends Controller
         return back()->with('success', "{$user->name} has been demoted to regular user.");
     }
 }
+
