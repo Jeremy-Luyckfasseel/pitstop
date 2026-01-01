@@ -38,11 +38,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 });
 
-// Public profile route (accessible by logged-in users)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/profile/{user:username}', [ProfileController::class, 'show'])
-        ->name('profile.show');
-});
+// Public profile route (accessible by everyone, including guests)
+Route::get('/profile/{user:username}', [ProfileController::class, 'show'])
+    ->name('profile.show');
 
 // Forum routes - requires authentication
 Route::middleware(['auth'])->group(function () {
@@ -87,6 +85,8 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
 
     // User management routes
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::post('/users/{user}/promote', [UserController::class, 'promote'])->name('users.promote');
     Route::post('/users/{user}/demote', [UserController::class, 'demote'])->name('users.demote');
 });
