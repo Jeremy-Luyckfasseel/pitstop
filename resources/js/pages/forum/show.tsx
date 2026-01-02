@@ -38,6 +38,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
 import AppLayout from '@/layouts/app-layout';
+import { formatDateTime, getInitials } from '@/lib/format';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -105,25 +106,6 @@ export default function ThreadShow({
     const editForm = useForm({
         body: '',
     });
-
-    const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        });
-    };
-
-    const getInitials = (name: string) => {
-        return name
-            .split(' ')
-            .map((n) => n[0])
-            .join('')
-            .toUpperCase()
-            .slice(0, 2);
-    };
 
     const handleDeleteThread = () => {
         router.delete(`/forum/${thread.id}`);
@@ -282,7 +264,7 @@ export default function ThreadShow({
                                     </div>
                                     <span className="flex items-center gap-1">
                                         <Calendar className="h-4 w-4" />
-                                        {formatDate(thread.created_at)}
+                                        {formatDateTime(thread.created_at)}
                                     </span>
                                 </CardDescription>
                             </div>
@@ -339,7 +321,7 @@ export default function ThreadShow({
                                                         {reply.author.name}
                                                     </Link>
                                                     <p className="text-xs text-muted-foreground">
-                                                        {formatDate(
+                                                        {formatDateTime(
                                                             reply.created_at
                                                         )}
                                                     </p>
