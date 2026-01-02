@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Reply extends Model
 {
@@ -15,12 +18,12 @@ class Reply extends Model
         'body',
     ];
 
-    public function thread()
+    public function thread(): BelongsTo
     {
         return $this->belongsTo(Thread::class);
     }
 
-    public function author()
+    public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
