@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreThreadRequest;
@@ -8,6 +10,7 @@ use App\Models\Thread;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -95,9 +98,9 @@ class ThreadController extends Controller
                 'author' => $thread->author,
                 'replies' => $repliesWithPermissions,
             ],
-            'canEdit' => $this->userCan('update', $thread),
-            'canDelete' => $this->userCan('delete', $thread),
-            'canPin' => $this->userCan('pin', $thread),
+            'canEdit' => Gate::allows('update', $thread),
+            'canDelete' => Gate::allows('delete', $thread),
+            'canPin' => Gate::allows('pin', $thread),
             'isFavorited' => $isFavorited,
         ]);
     }
@@ -174,21 +177,4 @@ class ThreadController extends Controller
         return back()->with('success', $message);
     }
 
-    /**
-     * Check if the current user can perform an action.
-     */
-    private function userCan(string $ability, Thread $thread): bool
-    {
-        $user = request()->user();
-
-        if (!$user) {
-            return false;
-        }
-
-        return match ($ability) {
-            'update', 'delete' => $user->is_admin || $user->id === $thread->user_id,
-            'pin' => $user->is_admin,
-            default => false,
-        };
-    }
 }
