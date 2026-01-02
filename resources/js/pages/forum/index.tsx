@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import AppLayout from '@/layouts/app-layout';
+import { formatDate, getInitials } from '@/lib/format';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -65,23 +66,6 @@ interface Props {
 
 export default function ForumIndex({ threads, currentSort }: Props) {
     const { auth } = usePage<SharedData>().props;
-
-    const formatDate = (date: string) => {
-        return new Date(date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
-    };
-
-    const getInitials = (name: string) => {
-        return name
-            .split(' ')
-            .map((n) => n[0])
-            .join('')
-            .toUpperCase()
-            .slice(0, 2);
-    };
 
     const handleSortChange = (value: string) => {
         router.get('/forum', { sort: value }, { preserveState: true });
