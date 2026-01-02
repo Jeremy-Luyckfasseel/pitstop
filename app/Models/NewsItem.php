@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NewsItem extends Model
 {
@@ -24,13 +28,15 @@ class NewsItem extends Model
         ];
     }
 
-    public function author()
+    public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    // Helper scope for published news
-    public function scopePublished($query)
+    /**
+     * Scope a query to only include published news items.
+     */
+    public function scopePublished(Builder $query): Builder
     {
         return $query->whereNotNull('published_at')
             ->where('published_at', '<=', now());
