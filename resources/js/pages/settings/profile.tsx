@@ -1,4 +1,5 @@
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
+import { getInitials } from '@/lib/format';
 import { send } from '@/routes/verification';
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
@@ -51,15 +52,6 @@ export default function Profile({
         return null;
     };
 
-    const getInitials = () => {
-        return auth.user.name
-            .split(' ')
-            .map((n) => n[0])
-            .join('')
-            .toUpperCase()
-            .slice(0, 2);
-    };
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Profile settings" />
@@ -85,7 +77,7 @@ export default function Profile({
                                     <div className="flex items-center gap-4">
                                         <Avatar className="h-20 w-20">
                                             <AvatarImage src={getAvatarUrl() || undefined} />
-                                            <AvatarFallback>{getInitials()}</AvatarFallback>
+                                            <AvatarFallback>{getInitials(auth.user.name)}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-1">
                                             <Input
