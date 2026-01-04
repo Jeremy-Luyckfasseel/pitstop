@@ -37,8 +37,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         NewsItem::create([
-            'title' => '2024 Season Preview',
-            'content' => 'Get ready for an exciting 2024 F1 season. Who will challenge for the championship?',
+            'title' => '2026 Season Preview',
+            'content' => 'Get ready for an exciting 2026 F1 season. Who will challenge for the championship?',
             'published_at' => now()->subDays(2),
             'user_id' => $admin->id,
         ]);
@@ -79,8 +79,8 @@ class DatabaseSeeder extends Seeder
         // Create Forum Threads
         $thread1 = Thread::create([
             'user_id' => $users->random()->id,
-            'title' => 'Who will win the 2024 Championship?',
-            'body' => 'I think Max will dominate again, but Ferrari looks strong this year. What are your predictions?',
+            'title' => 'Who will win the 2026 Championship?',
+            'body' => 'I think Max will dominate again, but Mercedes looks strong this year. What are your predictions?',
             'is_pinned' => true,
         ]);
 
