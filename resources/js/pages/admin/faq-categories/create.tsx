@@ -1,9 +1,9 @@
 import { Head, useForm } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
 import { type BreadcrumbItem } from '@/types';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/back-button';
 import {
     Card,
     CardContent,
@@ -48,19 +48,15 @@ export default function AdminFaqCategoriesCreate() {
 
             <div className="space-y-6">
                 <div className="flex items-center gap-4">
-                    <Button variant="outline" size="icon" asChild>
-                        <a href="/admin/faq-categories">
-                            <ArrowLeft className="h-4 w-4" />
-                        </a>
-                    </Button>
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            Create FAQ Category
-                        </h1>
-                        <p className="text-muted-foreground">
-                            Add a new category to organize your FAQs
-                        </p>
-                    </div>
+                    <BackButton fallbackUrl="/admin/faq-categories">Back</BackButton>
+                </div>
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">
+                        Create FAQ Category
+                    </h1>
+                    <p className="text-muted-foreground">
+                        Add a new category to organize your FAQs
+                    </p>
                 </div>
 
                 <Card>
