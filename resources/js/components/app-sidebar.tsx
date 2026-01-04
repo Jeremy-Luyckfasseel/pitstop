@@ -30,7 +30,7 @@ const mainNavItems: NavItem[] = [
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
     
-    const adminNavItems: NavItem[] = auth.user.is_admin
+    const adminNavItems: NavItem[] = auth.user?.is_admin
         ? [
               {
                   title: 'Admin Dashboard',
