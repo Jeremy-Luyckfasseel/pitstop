@@ -1,9 +1,10 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, UserPlus } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
 import { type BreadcrumbItem } from '@/types';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/back-button';
 import {
     Card,
     CardContent,
@@ -54,19 +55,15 @@ export default function CreateUser() {
 
             <div className="space-y-6">
                 <div className="flex items-center gap-4">
-                    <Button variant="outline" size="icon" asChild>
-                        <Link href="/admin/users">
-                            <ArrowLeft className="h-4 w-4" />
-                        </Link>
-                    </Button>
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            Create New User
-                        </h1>
-                        <p className="text-muted-foreground">
-                            Manually create a new user account
-                        </p>
-                    </div>
+                    <BackButton fallbackUrl="/admin/users">Back</BackButton>
+                </div>
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">
+                        Create New User
+                    </h1>
+                    <p className="text-muted-foreground">
+                        Manually create a new user account
+                    </p>
                 </div>
 
                 <Card className="max-w-xl">
