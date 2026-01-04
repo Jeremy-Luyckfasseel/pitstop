@@ -1,17 +1,10 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Edit, Plus, Trash2 } from 'lucide-react';
+import { Edit, FolderOpen, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 import { type BreadcrumbItem } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -22,25 +15,11 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Admin',
-        href: '/admin/dashboard',
-    },
-    {
-        title: 'FAQ Categories',
-        href: '/admin/faq-categories',
-    },
+    { title: 'Admin', href: '/admin/dashboard' },
+    { title: 'FAQ Categories', href: '/admin/faq-categories' },
 ];
 
 interface FaqCategory {
@@ -50,142 +29,90 @@ interface FaqCategory {
     faqs_count: number;
 }
 
-export default function AdminFaqCategoriesIndex({
-    categories,
-}: {
-    categories: FaqCategory[];
-}) {
+export default function AdminFaqCategoriesIndex({ categories }: { categories: FaqCategory[] }) {
     const [deleteId, setDeleteId] = useState<number | null>(null);
 
     const handleDelete = (id: number) => {
-        router.delete(`/admin/faq-categories/${id}`, {
-            onSuccess: () => setDeleteId(null),
-        });
+        router.delete(`/admin/faq-categories/${id}`, { onSuccess: () => setDeleteId(null) });
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="FAQ Categories" />
 
-            <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            FAQ Categories
-                        </h1>
-                        <p className="text-muted-foreground">
-                            Manage FAQ categories to organize your questions
-                        </p>
+            <div className="p-6">
+                {/* Hero Header */}
+                <div className="relative mb-8 overflow-hidden rounded-2xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-900 to-green-950/30 p-8">
+                    <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-green-500/10 blur-3xl" />
+                    <div className="relative flex flex-wrap items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-lg shadow-green-500/20">
+                                <FolderOpen className="h-7 w-7 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-3xl font-black text-white">FAQ Categories</h1>
+                                <p className="text-zinc-400">{categories.length} categor{categories.length !== 1 ? 'ies' : 'y'} to organize FAQs</p>
+                            </div>
+                        </div>
+                        <Button asChild className="bg-green-600 hover:bg-green-500">
+                            <Link href="/admin/faq-categories/create">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Category
+                            </Link>
+                        </Button>
                     </div>
-                    <Button asChild>
-                        <Link href="/admin/faq-categories/create">
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add Category
-                        </Link>
-                    </Button>
                 </div>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Categories</CardTitle>
-                        <CardDescription>
-                            A list of all FAQ categories ordered by display
-                            order
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {categories.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-12">
-                                <p className="text-muted-foreground">
-                                    No categories yet. Create your first one!
-                                </p>
-                                <Button asChild className="mt-4">
-                                    <Link href="/admin/faq-categories/create">
-                                        <Plus className="mr-2 h-4 w-4" />
-                                        Add Category
-                                    </Link>
-                                </Button>
+                {categories.length === 0 ? (
+                    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 py-16 text-center">
+                        <FolderOpen className="mx-auto mb-4 h-12 w-12 text-zinc-600" />
+                        <p className="text-zinc-400">No categories yet. Create your first one!</p>
+                        <Button asChild className="mt-4 bg-green-600 hover:bg-green-500">
+                            <Link href="/admin/faq-categories/create">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Category
+                            </Link>
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {categories.map((category) => (
+                            <div key={category.id} className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5 transition-colors hover:bg-zinc-900">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="flex-1">
+                                        <Badge className="bg-zinc-700 text-zinc-300">#{category.order}</Badge>
+                                        <h3 className="mt-3 text-lg font-bold text-white">{category.name}</h3>
+                                        <p className="mt-1 text-sm text-zinc-500">{category.faqs_count} question{category.faqs_count !== 1 ? 's' : ''}</p>
+                                    </div>
+                                </div>
+                                <div className="mt-4 flex gap-2">
+                                    <Button variant="outline" size="sm" asChild className="flex-1 border-zinc-700 hover:bg-zinc-800">
+                                        <Link href={`/admin/faq-categories/${category.id}/edit`}>
+                                            <Edit className="mr-2 h-4 w-4" />
+                                            Edit
+                                        </Link>
+                                    </Button>
+                                    <Button variant="outline" size="sm" onClick={() => setDeleteId(category.id)} className="border-red-500/30 text-red-400 hover:bg-red-500/10">
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </div>
                             </div>
-                        ) : (
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Order</TableHead>
-                                        <TableHead>Name</TableHead>
-                                        <TableHead>FAQs</TableHead>
-                                        <TableHead className="w-[100px]">
-                                            Actions
-                                        </TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {categories.map((category) => (
-                                        <TableRow key={category.id}>
-                                            <TableCell>
-                                                <Badge variant="outline">
-                                                    {category.order}
-                                                </Badge>
-                                            </TableCell>
-                                            <TableCell className="font-medium">
-                                                {category.name}
-                                            </TableCell>
-                                            <TableCell>
-                                                {category.faqs_count} questions
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex gap-2">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="icon"
-                                                        asChild
-                                                    >
-                                                        <Link
-                                                            href={`/admin/faq-categories/${category.id}/edit`}
-                                                        >
-                                                            <Edit className="h-4 w-4" />
-                                                        </Link>
-                                                    </Button>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="icon"
-                                                        onClick={() =>
-                                                            setDeleteId(
-                                                                category.id
-                                                            )
-                                                        }
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        )}
-                    </CardContent>
-                </Card>
+                        ))}
+                    </div>
+                )}
             </div>
 
-            <AlertDialog
-                open={deleteId !== null}
-                onOpenChange={() => setDeleteId(null)}
-            >
-                <AlertDialogContent>
+            <AlertDialog open={deleteId !== null} onOpenChange={() => setDeleteId(null)}>
+                <AlertDialogContent className="border-zinc-800 bg-zinc-900">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>
-                            Are you absolutely sure?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action cannot be undone. This will permanently
-                            delete this category and all its FAQs.
+                        <AlertDialogTitle className="text-white">Delete this category?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-zinc-400">
+                            This action cannot be undone. This will delete the category and all its FAQs.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={() => deleteId && handleDelete(deleteId)}
-                        >
+                        <AlertDialogCancel className="border-zinc-700 hover:bg-zinc-800">Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => deleteId && handleDelete(deleteId)} className="bg-red-600 hover:bg-red-500">
                             Delete
                         </AlertDialogAction>
                     </AlertDialogFooter>
