@@ -1,9 +1,9 @@
 import { Form, Head, router } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 
 import { type BreadcrumbItem } from '@/types';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/back-button';
 import {
     Card,
     CardContent,
@@ -64,19 +64,15 @@ export default function AdminNewsCreate() {
 
             <div className="space-y-6">
                 <div className="flex items-center gap-4">
-                    <Button variant="outline" size="icon" asChild>
-                        <a href="/admin/news">
-                            <ArrowLeft className="h-4 w-4" />
-                        </a>
-                    </Button>
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">
-                            Create News Article
-                        </h1>
-                        <p className="text-muted-foreground">
-                            Add a new news article to your site
-                        </p>
-                    </div>
+                    <BackButton fallbackUrl="/admin/news">Back</BackButton>
+                </div>
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">
+                        Create News Article
+                    </h1>
+                    <p className="text-muted-foreground">
+                        Add a new news article to your site
+                    </p>
                 </div>
 
                 <Card>
