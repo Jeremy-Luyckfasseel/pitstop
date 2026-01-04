@@ -10,19 +10,14 @@ import {
     Send,
     Trash2,
     X,
+    User,
 } from 'lucide-react';
 import { FormEventHandler, useState } from 'react';
 
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { BackButton } from '@/components/back-button';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -39,17 +34,6 @@ import { Label } from '@/components/ui/label';
 import InputError from '@/components/input-error';
 import AppLayout from '@/layouts/app-layout';
 import { formatDateTime, getInitials } from '@/lib/format';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Forum',
-        href: '/forum',
-    },
-    {
-        title: 'Thread',
-        href: '#',
-    },
-];
 
 interface Author {
     id: number;
@@ -97,33 +81,21 @@ export default function ThreadShow({
     const [deleteReplyId, setDeleteReplyId] = useState<number | null>(null);
     const [editingReplyId, setEditingReplyId] = useState<number | null>(null);
 
-    // Reply form
-    const replyForm = useForm({
-        body: '',
-    });
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Forum', href: '/forum' },
+        { title: thread.title.slice(0, 30) + (thread.title.length > 30 ? '...' : ''), href: '#' },
+    ];
 
-    // Edit reply form
-    const editForm = useForm({
-        body: '',
-    });
+    const replyForm = useForm({ body: '' });
+    const editForm = useForm({ body: '' });
 
-    const handleDeleteThread = () => {
-        router.delete(`/forum/${thread.id}`);
-    };
-
-    const handlePin = () => {
-        router.post(`/forum/${thread.id}/pin`);
-    };
-
-    const handleFavorite = () => {
-        router.post(`/forum/${thread.id}/favorite`);
-    };
+    const handleDeleteThread = () => router.delete(`/forum/${thread.id}`);
+    const handlePin = () => router.post(`/forum/${thread.id}/pin`);
+    const handleFavorite = () => router.post(`/forum/${thread.id}/favorite`);
 
     const submitReply: FormEventHandler = (e) => {
         e.preventDefault();
-        replyForm.post(`/forum/${thread.id}/replies`, {
-            onSuccess: () => replyForm.reset(),
-        });
+        replyForm.post(`/forum/${thread.id}/replies`, { onSuccess: () => replyForm.reset() });
     };
 
     const startEditReply = (reply: Reply) => {
@@ -140,19 +112,14 @@ export default function ThreadShow({
         e.preventDefault();
         if (editingReplyId) {
             editForm.put(`/replies/${editingReplyId}`, {
-                onSuccess: () => {
-                    setEditingReplyId(null);
-                    editForm.reset();
-                },
+                onSuccess: () => { setEditingReplyId(null); editForm.reset(); },
             });
         }
     };
 
     const handleDeleteReply = () => {
         if (deleteReplyId) {
-            router.delete(`/replies/${deleteReplyId}`, {
-                onSuccess: () => setDeleteReplyId(null),
-            });
+            router.delete(`/replies/${deleteReplyId}`, { onSuccess: () => setDeleteReplyId(null) });
         }
     };
 
@@ -160,369 +127,182 @@ export default function ThreadShow({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={thread.title} />
 
-            <div className="mx-auto max-w-4xl space-y-6">
-                {/* Back button and actions */}
-                <div className="flex items-center justify-between">
-                    <Button variant="outline" size="sm" asChild>
-                        <Link href="/forum">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to Forum
-                        </Link>
-                    </Button>
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant={isFavorited ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={handleFavorite}
-                        >
-                            <Heart
-                                className={`mr-2 h-4 w-4 ${isFavorited ? 'fill-current' : ''}`}
-                            />
-                            {isFavorited ? 'Favorited' : 'Favorite'}
-                        </Button>
-                        {canPin && (
+            <div className="p-6">
+                <div className="mx-auto max-w-4xl">
+                    {/* Header with back and actions */}
+                    <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+                        <BackButton fallbackUrl="/forum">Back to Forum</BackButton>
+                        <div className="flex flex-wrap items-center gap-2">
                             <Button
-                                variant="outline"
+                                variant={isFavorited ? 'default' : 'outline'}
                                 size="sm"
-                                onClick={handlePin}
+                                onClick={handleFavorite}
+                                className={isFavorited ? 'bg-red-600 hover:bg-red-500' : 'border-zinc-700 hover:bg-zinc-800'}
                             >
-                                {thread.is_pinned ? (
-                                    <>
-                                        <PinOff className="mr-2 h-4 w-4" />
-                                        Unpin
-                                    </>
-                                ) : (
-                                    <>
-                                        <Pin className="mr-2 h-4 w-4" />
-                                        Pin
-                                    </>
-                                )}
+                                <Heart className={`mr-2 h-4 w-4 ${isFavorited ? 'fill-current' : ''}`} />
+                                {isFavorited ? 'Favorited' : 'Favorite'}
                             </Button>
-                        )}
-                        {canEdit && (
-                            <Button variant="outline" size="sm" asChild>
-                                <Link href={`/forum/${thread.id}/edit`}>
-                                    <Edit className="mr-2 h-4 w-4" />
-                                    Edit
-                                </Link>
-                            </Button>
-                        )}
-                        {canDelete && (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setShowDeleteDialog(true)}
-                            >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                            </Button>
-                        )}
+                            {canPin && (
+                                <Button variant="outline" size="sm" onClick={handlePin} className="border-zinc-700 hover:bg-zinc-800">
+                                    {thread.is_pinned ? <><PinOff className="mr-2 h-4 w-4" />Unpin</> : <><Pin className="mr-2 h-4 w-4" />Pin</>}
+                                </Button>
+                            )}
+                            {canEdit && (
+                                <Button variant="outline" size="sm" asChild className="border-zinc-700 hover:bg-zinc-800">
+                                    <Link href={`/forum/${thread.id}/edit`}><Edit className="mr-2 h-4 w-4" />Edit</Link>
+                                </Button>
+                            )}
+                            {canDelete && (
+                                <Button variant="outline" size="sm" onClick={() => setShowDeleteDialog(true)} className="border-red-500/30 text-red-400 hover:bg-red-500/10">
+                                    <Trash2 className="mr-2 h-4 w-4" />Delete
+                                </Button>
+                            )}
+                        </div>
                     </div>
-                </div>
 
-                {/* Thread content */}
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                                <div className="mb-2 flex items-center gap-2">
-                                    {thread.is_pinned && (
-                                        <Badge
-                                            variant="default"
-                                            className="flex items-center gap-1"
-                                        >
-                                            <Pin className="h-3 w-3" />
-                                            Pinned
-                                        </Badge>
-                                    )}
-                                </div>
-                                <CardTitle className="text-2xl">
-                                    {thread.title}
-                                </CardTitle>
-                                <CardDescription className="mt-2 flex items-center gap-4">
-                                    <div className="flex items-center gap-2">
-                                        <Avatar className="h-6 w-6">
-                                            <AvatarImage
-                                                src={
-                                                    thread.author.avatar
-                                                        ? `/storage/${thread.author.avatar}`
-                                                        : undefined
-                                                }
-                                            />
-                                            <AvatarFallback className="text-xs">
-                                                {getInitials(
-                                                    thread.author.name
-                                                )}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <Link
-                                            href={`/profile/${thread.author.username}`}
-                                            className="hover:underline"
-                                        >
-                                            {thread.author.name}
-                                        </Link>
+                    {/* Thread Content */}
+                    <article className="mb-8 rounded-2xl border border-zinc-800 bg-zinc-900/50">
+                        <div className="border-b border-zinc-800 p-6">
+                            <div className="mb-4 flex flex-wrap items-center gap-2">
+                                {thread.is_pinned && (
+                                    <Badge className="bg-red-500/20 text-red-400">
+                                        <Pin className="mr-1 h-3 w-3" />Pinned
+                                    </Badge>
+                                )}
+                            </div>
+                            <h1 className="mb-4 text-3xl font-bold text-white">{thread.title}</h1>
+                            <div className="flex flex-wrap items-center gap-4">
+                                <Link href={`/profile/${thread.author.username}`} className="group flex items-center gap-3">
+                                    <Avatar className="h-10 w-10 border-2 border-zinc-700 transition-colors group-hover:border-red-500">
+                                        <AvatarImage src={thread.author.avatar ? `/storage/${thread.author.avatar}` : undefined} />
+                                        <AvatarFallback className="bg-zinc-800 text-white">{getInitials(thread.author.name)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="font-medium text-white transition-colors group-hover:text-red-400">{thread.author.name}</p>
+                                        <p className="text-sm text-zinc-500">@{thread.author.username}</p>
                                     </div>
-                                    <span className="flex items-center gap-1">
-                                        <Calendar className="h-4 w-4" />
-                                        {formatDateTime(thread.created_at)}
-                                    </span>
-                                </CardDescription>
+                                </Link>
+                                <div className="flex items-center gap-2 text-sm text-zinc-500">
+                                    <Calendar className="h-4 w-4" />
+                                    {formatDateTime(thread.created_at)}
+                                </div>
                             </div>
                         </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="prose prose-neutral dark:prose-invert max-w-none">
-                            <p className="whitespace-pre-wrap">{thread.body}</p>
+                        <div className="p-6">
+                            <div className="whitespace-pre-wrap text-lg leading-relaxed text-zinc-300">{thread.body}</div>
                         </div>
-                    </CardContent>
-                </Card>
+                    </article>
 
-                {/* Replies section */}
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <h2 className="flex items-center gap-2 text-xl font-semibold">
-                            <MessageSquare className="h-5 w-5" />
+                    {/* Replies Section */}
+                    <div className="mb-6">
+                        <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-white">
+                            <MessageSquare className="h-5 w-5 text-red-500" />
                             Replies ({thread.replies.length})
                         </h2>
-                    </div>
 
-                    {thread.replies.length === 0 ? (
-                        <Card>
-                            <CardContent className="py-8 text-center text-muted-foreground">
-                                No replies yet. Be the first to respond!
-                            </CardContent>
-                        </Card>
-                    ) : (
-                        <div className="space-y-4">
-                            {thread.replies.map((reply, index) => (
-                                <Card key={reply.id}>
-                                    <CardHeader className="pb-2">
-                                        <div className="flex items-center justify-between">
+                        {thread.replies.length === 0 ? (
+                            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 py-12 text-center">
+                                <MessageSquare className="mx-auto mb-3 h-10 w-10 text-zinc-600" />
+                                <p className="text-zinc-400">No replies yet. Be the first to respond!</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {thread.replies.map((reply, index) => (
+                                    <div key={reply.id} className="rounded-xl border border-zinc-800 bg-zinc-900/50">
+                                        <div className="flex items-center justify-between border-b border-zinc-800 p-4">
                                             <div className="flex items-center gap-3">
-                                                <Avatar className="h-8 w-8">
-                                                    <AvatarImage
-                                                        src={
-                                                            reply.author.avatar
-                                                                ? `/storage/${reply.author.avatar}`
-                                                                : undefined
-                                                        }
-                                                    />
-                                                    <AvatarFallback className="text-xs">
-                                                        {getInitials(
-                                                            reply.author.name
-                                                        )}
-                                                    </AvatarFallback>
+                                                <Avatar className="h-8 w-8 border border-zinc-700">
+                                                    <AvatarImage src={reply.author.avatar ? `/storage/${reply.author.avatar}` : undefined} />
+                                                    <AvatarFallback className="bg-zinc-800 text-xs text-white">{getInitials(reply.author.name)}</AvatarFallback>
                                                 </Avatar>
                                                 <div>
-                                                    <Link
-                                                        href={`/profile/${reply.author.username}`}
-                                                        className="font-medium hover:underline"
-                                                    >
-                                                        {reply.author.name}
-                                                    </Link>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {formatDateTime(
-                                                            reply.created_at
-                                                        )}
-                                                    </p>
+                                                    <Link href={`/profile/${reply.author.username}`} className="font-medium text-white hover:text-red-400">{reply.author.name}</Link>
+                                                    <p className="text-xs text-zinc-500">{formatDateTime(reply.created_at)}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <Badge variant="outline">
-                                                    #{index + 1}
-                                                </Badge>
+                                                <Badge variant="outline" className="border-zinc-700 text-zinc-500">#{index + 1}</Badge>
                                                 {reply.canEdit && (
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8"
-                                                        onClick={() =>
-                                                            startEditReply(
-                                                                reply
-                                                            )
-                                                        }
-                                                    >
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white" onClick={() => startEditReply(reply)}>
                                                         <Edit className="h-4 w-4" />
                                                     </Button>
                                                 )}
                                                 {reply.canDelete && (
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8"
-                                                        onClick={() =>
-                                                            setDeleteReplyId(
-                                                                reply.id
-                                                            )
-                                                        }
-                                                    >
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-red-400" onClick={() => setDeleteReplyId(reply.id)}>
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
                                                 )}
                                             </div>
                                         </div>
-                                    </CardHeader>
-                                    <CardContent>
-                                        {editingReplyId === reply.id ? (
-                                            <form
-                                                onSubmit={submitEditReply}
-                                                className="space-y-4"
-                                            >
-                                                <Textarea
-                                                    value={editForm.data.body}
-                                                    onChange={(e) =>
-                                                        editForm.setData(
-                                                            'body',
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    rows={4}
-                                                />
-                                                <InputError
-                                                    message={
-                                                        editForm.errors.body
-                                                    }
-                                                />
-                                                <div className="flex gap-2">
-                                                    <Button
-                                                        type="submit"
-                                                        size="sm"
-                                                        disabled={
-                                                            editForm.processing
-                                                        }
-                                                    >
-                                                        Save
-                                                    </Button>
-                                                    <Button
-                                                        type="button"
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={cancelEditReply}
-                                                    >
-                                                        <X className="mr-1 h-4 w-4" />
-                                                        Cancel
-                                                    </Button>
-                                                </div>
-                                            </form>
-                                        ) : (
-                                            <p className="whitespace-pre-wrap">
-                                                {reply.body}
-                                            </p>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Reply form */}
-                    {auth.user ? (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="text-lg">
-                                    Post a Reply
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <form
-                                    onSubmit={submitReply}
-                                    className="space-y-4"
-                                >
-                                    <div className="grid gap-2">
-                                        <Label htmlFor="reply-body">
-                                            Your Reply
-                                        </Label>
-                                        <Textarea
-                                            id="reply-body"
-                                            value={replyForm.data.body}
-                                            onChange={(e) =>
-                                                replyForm.setData(
-                                                    'body',
-                                                    e.target.value
-                                                )
-                                            }
-                                            rows={4}
-                                            placeholder="Write your reply here..."
-                                        />
-                                        <p className="text-sm text-muted-foreground">
-                                            {replyForm.data.body.length}/5,000
-                                            characters
-                                        </p>
-                                        <InputError
-                                            message={replyForm.errors.body}
-                                        />
+                                        <div className="p-4">
+                                            {editingReplyId === reply.id ? (
+                                                <form onSubmit={submitEditReply} className="space-y-4">
+                                                    <Textarea value={editForm.data.body} onChange={(e) => editForm.setData('body', e.target.value)} rows={4} className="border-zinc-700 bg-zinc-800 text-white" />
+                                                    <InputError message={editForm.errors.body} />
+                                                    <div className="flex gap-2">
+                                                        <Button type="submit" size="sm" disabled={editForm.processing} className="bg-red-600 hover:bg-red-500">Save</Button>
+                                                        <Button type="button" variant="outline" size="sm" onClick={cancelEditReply} className="border-zinc-700"><X className="mr-1 h-4 w-4" />Cancel</Button>
+                                                    </div>
+                                                </form>
+                                            ) : (
+                                                <p className="whitespace-pre-wrap text-zinc-300">{reply.body}</p>
+                                            )}
+                                        </div>
                                     </div>
-                                    <Button
-                                        type="submit"
-                                        disabled={replyForm.processing}
-                                    >
-                                        <Send className="mr-2 h-4 w-4" />
-                                        Post Reply
-                                    </Button>
-                                </form>
-                            </CardContent>
-                        </Card>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Reply Form */}
+                    {auth.user ? (
+                        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6">
+                            <h3 className="mb-4 text-lg font-bold text-white">Post a Reply</h3>
+                            <form onSubmit={submitReply} className="space-y-4">
+                                <div>
+                                    <Label htmlFor="reply-body" className="text-zinc-300">Your Reply</Label>
+                                    <Textarea id="reply-body" value={replyForm.data.body} onChange={(e) => replyForm.setData('body', e.target.value)} rows={4} placeholder="Share your thoughts..." className="mt-2 border-zinc-700 bg-zinc-800 text-white placeholder:text-zinc-500" />
+                                    <p className="mt-1 text-xs text-zinc-500">{replyForm.data.body.length}/5,000</p>
+                                    <InputError message={replyForm.errors.body} />
+                                </div>
+                                <Button type="submit" disabled={replyForm.processing} className="bg-red-600 hover:bg-red-500">
+                                    <Send className="mr-2 h-4 w-4" />Post Reply
+                                </Button>
+                            </form>
+                        </div>
                     ) : (
-                        <Card>
-                            <CardContent className="py-6 text-center">
-                                <p className="text-muted-foreground">
-                                    Please{' '}
-                                    <Link
-                                        href="/login"
-                                        className="text-primary underline"
-                                    >
-                                        log in
-                                    </Link>{' '}
-                                    to post a reply.
-                                </p>
-                            </CardContent>
-                        </Card>
+                        <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 py-8 text-center">
+                            <p className="text-zinc-400">
+                                Please <Link href="/login" className="text-red-400 hover:underline">log in</Link> to post a reply.
+                            </p>
+                        </div>
                     )}
                 </div>
             </div>
 
-            {/* Delete thread confirmation dialog */}
-            <AlertDialog
-                open={showDeleteDialog}
-                onOpenChange={setShowDeleteDialog}
-            >
-                <AlertDialogContent>
+            {/* Delete dialogs */}
+            <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogContent className="border-zinc-800 bg-zinc-900">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>
-                            Delete this thread?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action cannot be undone. This will permanently
-                            delete this thread and all its replies.
-                        </AlertDialogDescription>
+                        <AlertDialogTitle className="text-white">Delete this thread?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-zinc-400">This action cannot be undone. This will permanently delete this thread and all its replies.</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDeleteThread}>
-                            Delete
-                        </AlertDialogAction>
+                        <AlertDialogCancel className="border-zinc-700 hover:bg-zinc-800">Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteThread} className="bg-red-600 hover:bg-red-500">Delete</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
 
-            {/* Delete reply confirmation dialog */}
-            <AlertDialog
-                open={deleteReplyId !== null}
-                onOpenChange={() => setDeleteReplyId(null)}
-            >
-                <AlertDialogContent>
+            <AlertDialog open={deleteReplyId !== null} onOpenChange={() => setDeleteReplyId(null)}>
+                <AlertDialogContent className="border-zinc-800 bg-zinc-900">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Delete this reply?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action cannot be undone. This will permanently
-                            delete this reply.
-                        </AlertDialogDescription>
+                        <AlertDialogTitle className="text-white">Delete this reply?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-zinc-400">This action cannot be undone.</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDeleteReply}>
-                            Delete
-                        </AlertDialogAction>
+                        <AlertDialogCancel className="border-zinc-700 hover:bg-zinc-800">Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeleteReply} className="bg-red-600 hover:bg-red-500">Delete</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
