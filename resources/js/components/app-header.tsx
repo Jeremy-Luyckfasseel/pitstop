@@ -32,7 +32,7 @@ import { cn, isSameUrl, resolveUrl } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Home, HelpCircle, MessageSquare, Mail, ShieldCheck, Menu, Search } from 'lucide-react';
+import { Home, Newspaper, HelpCircle, MessageSquare, Mail, ShieldCheck, Menu, Search } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -41,6 +41,11 @@ const mainNavItems: NavItem[] = [
         title: 'Home',
         href: '/',
         icon: Home,
+    },
+    {
+        title: 'News',
+        href: '/news',
+        icon: Newspaper,
     },
     {
         title: 'FAQ',
