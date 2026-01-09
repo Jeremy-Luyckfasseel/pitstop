@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { Plus, Shield, ShieldOff, Users, UserPlus } from 'lucide-react';
+import { Plus, Shield, ShieldOff, Trash2, Users, UserPlus } from 'lucide-react';
 import { useState } from 'react';
 
 import { type BreadcrumbItem } from '@/types';
@@ -51,19 +51,27 @@ interface Props {
 
 export default function UsersIndex({ users }: Props) {
     const [actionUser, setActionUser] = useState<User | null>(null);
-    const [actionType, setActionType] = useState<'promote' | 'demote' | null>(null);
+    const [actionType, setActionType] = useState<'promote' | 'demote' | 'delete' | null>(null);
 
     const getInitials = (name: string) => name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
     const formatDate = (date: string) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
     const handleAction = () => {
         if (!actionUser || !actionType) return;
+        
+        if (actionType === 'delete') {
+            router.delete(`/admin/users/${actionUser.id}`, {
+                onSuccess: () => { setActionUser(null); setActionType(null); },
+            });
+            return;
+        }
+
         router.post(`/admin/users/${actionUser.id}/${actionType}`, {}, {
             onSuccess: () => { setActionUser(null); setActionType(null); },
         });
     };
 
-    const openDialog = (user: User, type: 'promote' | 'demote') => {
+    const openDialog = (user: User, type: 'promote' | 'demote' | 'delete') => {
         setActionUser(user);
         setActionType(type);
     };
@@ -120,17 +128,23 @@ export default function UsersIndex({ users }: Props) {
                                 </div>
                             </div>
                             <div>
-                                {user.is_admin ? (
-                                    <Button variant="outline" size="sm" onClick={() => openDialog(user, 'demote')} className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10">
-                                        <ShieldOff className="mr-2 h-4 w-4" />
-                                        Demote
+                                <div className="flex gap-2">
+                                    {user.is_admin ? (
+                                        <Button variant="outline" size="sm" onClick={() => openDialog(user, 'demote')} className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10">
+                                            <ShieldOff className="mr-2 h-4 w-4" />
+                                            Demote
+                                        </Button>
+                                    ) : (
+                                        <Button variant="outline" size="sm" onClick={() => openDialog(user, 'promote')} className="border-green-500/30 text-green-400 hover:bg-green-500/10">
+                                            <Shield className="mr-2 h-4 w-4" />
+                                            Promote
+                                        </Button>
+                                    )}
+                                    <Button variant="outline" size="sm" onClick={() => openDialog(user, 'delete')} className="border-red-500/30 text-red-400 hover:bg-red-500/10">
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Delete
                                     </Button>
-                                ) : (
-                                    <Button variant="outline" size="sm" onClick={() => openDialog(user, 'promote')} className="border-green-500/30 text-green-400 hover:bg-green-500/10">
-                                        <Shield className="mr-2 h-4 w-4" />
-                                        Promote
-                                    </Button>
-                                )}
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -164,18 +178,29 @@ export default function UsersIndex({ users }: Props) {
                 <AlertDialogContent className="border-zinc-800 bg-zinc-900">
                     <AlertDialogHeader>
                         <AlertDialogTitle className="text-white">
-                            {actionType === 'promote' ? 'Promote to Admin?' : 'Demote to Regular User?'}
+                            {actionType === 'promote' && 'Promote to Admin?'}
+                            {actionType === 'demote' && 'Demote to Regular User?'}
+                            {actionType === 'delete' && 'Delete User?'}
                         </AlertDialogTitle>
                         <AlertDialogDescription className="text-zinc-400">
-                            {actionType === 'promote'
-                                ? `${actionUser?.name} will have full admin privileges including managing users, news, and FAQs.`
-                                : `${actionUser?.name} will lose all admin privileges and become a regular user.`}
+                            {actionType === 'promote' && `${actionUser?.name} will have full admin privileges including managing users, news, and FAQs.`}
+                            {actionType === 'demote' && `${actionUser?.name} will lose all admin privileges and become a regular user.`}
+                            {actionType === 'delete' && `Are you sure you want to delete ${actionUser?.name}? This action cannot be undone.`}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel className="border-zinc-700 hover:bg-zinc-800">Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleAction} className={actionType === 'promote' ? 'bg-green-600 hover:bg-green-500' : 'bg-amber-600 hover:bg-amber-500'}>
-                            {actionType === 'promote' ? 'Promote' : 'Demote'}
+                        <AlertDialogAction 
+                            onClick={handleAction} 
+                            className={
+                                actionType === 'promote' ? 'bg-green-600 hover:bg-green-500' : 
+                                actionType === 'demote' ? 'bg-amber-600 hover:bg-amber-500' :
+                                'bg-red-600 hover:bg-red-500'
+                            }
+                        >
+                            {actionType === 'promote' && 'Promote'}
+                            {actionType === 'demote' && 'Demote'}
+                            {actionType === 'delete' && 'Delete'}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
