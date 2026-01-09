@@ -93,5 +93,19 @@ class UserController extends Controller
 
         return back()->with('success', "{$user->name} has been demoted to regular user.");
     }
+    /**
+     * Remove the specified user from storage.
+     */
+    public function destroy(User $user): RedirectResponse
+    {
+        // Prevent deleting yourself
+        if ($user->id === request()->user()->id) {
+            return back()->with('error', 'You cannot delete yourself.');
+        }
+
+        $user->delete();
+
+        return back()->with('success', 'User deleted successfully.');
+    }
 }
 
