@@ -16,7 +16,7 @@ import {
 import { cn, isSameUrl } from '@/lib/utils';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Home, HelpCircle, MessageSquare, Mail, Menu, LogIn, UserPlus } from 'lucide-react';
+import { Home, Newspaper, HelpCircle, MessageSquare, Mail, Menu, LogIn, UserPlus } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -25,6 +25,11 @@ const mainNavItems: NavItem[] = [
         title: 'Home',
         href: '/',
         icon: Home,
+    },
+    {
+        title: 'News',
+        href: '/news',
+        icon: Newspaper,
     },
     {
         title: 'FAQ',
