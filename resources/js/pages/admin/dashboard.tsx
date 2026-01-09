@@ -27,8 +27,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 interface Stats {
     totalUsers: number;
     totalNews: number;
+    totalFaqs: number;
     totalThreads: number;
-    totalReplies: number;
 }
 
 interface RecentUser {
@@ -79,18 +79,18 @@ export default function AdminDashboard({ stats, recentUsers }: Props) {
             description: 'Published articles',
         },
         {
+            label: 'FAQ Questions',
+            value: stats.totalFaqs,
+            icon: HelpCircle,
+            color: 'green',
+            description: 'Help topics',
+        },
+        {
             label: 'Forum Threads',
             value: stats.totalThreads,
             icon: MessageSquare,
-            color: 'green',
-            description: 'Discussion topics',
-        },
-        {
-            label: 'Forum Replies',
-            value: stats.totalReplies,
-            icon: TrendingUp,
             color: 'blue',
-            description: 'Community engagement',
+            description: 'Community discussions',
         },
     ];
 
@@ -158,15 +158,29 @@ export default function AdminDashboard({ stats, recentUsers }: Props) {
                 <div className="mb-8">
                     <h2 className="mb-4 text-lg font-bold text-white">Quick Management</h2>
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        {/* News Management */}
-                        <Link href="/admin/news" className="group">
+                        {/* User Management */}
+                        <Link href="/admin/users" className="group">
                             <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-red-500/50 hover:bg-zinc-900">
                                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-red-500/10">
-                                    <Newspaper className="h-6 w-6 text-red-400" />
+                                    <Users className="h-6 w-6 text-red-400" />
                                 </div>
-                                <h3 className="font-semibold text-white group-hover:text-red-400">News Management</h3>
-                                <p className="mt-1 text-sm text-zinc-500">Create and edit articles</p>
+                                <h3 className="font-semibold text-white group-hover:text-red-400">User Management</h3>
+                                <p className="mt-1 text-sm text-zinc-500">Manage users & permissions</p>
                                 <div className="mt-4 flex items-center text-sm text-red-400">
+                                    Manage <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                </div>
+                            </div>
+                        </Link>
+
+                        {/* News Management */}
+                        <Link href="/admin/news" className="group">
+                            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-amber-500/50 hover:bg-zinc-900">
+                                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10">
+                                    <Newspaper className="h-6 w-6 text-amber-400" />
+                                </div>
+                                <h3 className="font-semibold text-white group-hover:text-amber-400">News Management</h3>
+                                <p className="mt-1 text-sm text-zinc-500">Create and edit articles</p>
+                                <div className="mt-4 flex items-center text-sm text-amber-400">
                                     Manage <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                 </div>
                             </div>
@@ -174,26 +188,12 @@ export default function AdminDashboard({ stats, recentUsers }: Props) {
 
                         {/* FAQ Management */}
                         <Link href="/admin/faqs" className="group">
-                            <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-amber-500/50 hover:bg-zinc-900">
-                                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10">
-                                    <HelpCircle className="h-6 w-6 text-amber-400" />
-                                </div>
-                                <h3 className="font-semibold text-white group-hover:text-amber-400">FAQ Management</h3>
-                                <p className="mt-1 text-sm text-zinc-500">Manage questions & answers</p>
-                                <div className="mt-4 flex items-center text-sm text-amber-400">
-                                    Manage <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                                </div>
-                            </div>
-                        </Link>
-
-                        {/* User Management */}
-                        <Link href="/admin/users" className="group">
                             <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 transition-all hover:border-green-500/50 hover:bg-zinc-900">
                                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-500/10">
-                                    <Users className="h-6 w-6 text-green-400" />
+                                    <HelpCircle className="h-6 w-6 text-green-400" />
                                 </div>
-                                <h3 className="font-semibold text-white group-hover:text-green-400">User Management</h3>
-                                <p className="mt-1 text-sm text-zinc-500">Manage users & permissions</p>
+                                <h3 className="font-semibold text-white group-hover:text-green-400">FAQ Management</h3>
+                                <p className="mt-1 text-sm text-zinc-500">Manage questions & answers</p>
                                 <div className="mt-4 flex items-center text-sm text-green-400">
                                     Manage <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
                                 </div>
