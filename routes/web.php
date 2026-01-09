@@ -44,7 +44,6 @@ Route::get('/profile/{user:username}', [ProfileController::class, 'show'])
 
 // Forum routes - PUBLIC (view only)
 Route::get('/forum', [ThreadController::class, 'index'])->name('forum.index');
-Route::get('/forum/{thread}', [ThreadController::class, 'show'])->name('forum.show');
 
 // Forum routes - requires authentication (create, edit, delete, etc.)
 Route::middleware(['auth'])->group(function () {
@@ -68,6 +67,9 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('replies/{reply}', [ReplyController::class, 'destroy'])
         ->name('replies.destroy');
 });
+
+// Move wildcard route strictly AFTER specific routes (like create)
+Route::get('/forum/{thread}', [ThreadController::class, 'show'])->name('forum.show');
 
 // Admin routes - requires authentication and admin privileges
 Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -94,6 +96,7 @@ Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::post('/users/{user}/promote', [UserController::class, 'promote'])->name('users.promote');
     Route::post('/users/{user}/demote', [UserController::class, 'demote'])->name('users.demote');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
 
 require __DIR__ . '/settings.php';
