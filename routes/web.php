@@ -42,18 +42,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/profile/{user:username}', [ProfileController::class, 'show'])
     ->name('profile.show');
 
-// Forum routes - requires authentication
+// Forum routes - PUBLIC (view only)
+Route::get('/forum', [ThreadController::class, 'index'])->name('forum.index');
+Route::get('/forum/{thread}', [ThreadController::class, 'show'])->name('forum.show');
+
+// Forum routes - requires authentication (create, edit, delete, etc.)
 Route::middleware(['auth'])->group(function () {
-    // Thread routes - use 'thread' parameter name for model binding
-    Route::resource('forum', ThreadController::class)->parameters([
-        'forum' => 'thread',
-    ]);
+    Route::get('/forum/create', [ThreadController::class, 'create'])->name('forum.create');
+    Route::post('/forum', [ThreadController::class, 'store'])->name('forum.store');
+    Route::get('/forum/{thread}/edit', [ThreadController::class, 'edit'])->name('forum.edit');
+    Route::put('/forum/{thread}', [ThreadController::class, 'update'])->name('forum.update');
+    Route::delete('/forum/{thread}', [ThreadController::class, 'destroy'])->name('forum.destroy');
+
     Route::post('forum/{thread}/pin', [ThreadController::class, 'pin'])
         ->name('forum.pin')
         ->middleware('is_admin');
     Route::post('forum/{thread}/favorite', [ThreadController::class, 'toggleFavorite'])
         ->name('forum.favorite');
-
 
     // Reply routes
     Route::post('forum/{thread}/replies', [ReplyController::class, 'store'])
