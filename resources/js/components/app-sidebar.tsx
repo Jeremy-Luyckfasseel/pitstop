@@ -11,19 +11,32 @@ import {
 } from '@/components/ui/sidebar';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { MessageSquare, Newspaper, ShieldCheck } from 'lucide-react';
+import { MessageSquare, Newspaper, ShieldCheck, HelpCircle, Mail } from 'lucide-react';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+const platformItems: NavItem[] = [
+    {
+        title: 'News',
+        href: '/news',
+        icon: Newspaper,
+    },
     {
         title: 'Forum',
         href: '/forum',
         icon: MessageSquare,
     },
+];
+
+const communityItems: NavItem[] = [
     {
-        title: 'News',
-        href: '/news',
-        icon: Newspaper,
+        title: 'FAQ',
+        href: '/faq',
+        icon: HelpCircle,
+    },
+    {
+        title: 'Contact',
+        href: '/contact',
+        icon: Mail,
     },
 ];
 
@@ -60,10 +73,11 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={platformItems} label="Platform" />
                 {adminNavItems.length > 0 && (
-                    <NavMain items={adminNavItems} />
+                    <NavMain items={adminNavItems} label="Admin" />
                 )}
+                <NavMain items={communityItems} label="Community" />
             </SidebarContent>
 
             <SidebarFooter>
