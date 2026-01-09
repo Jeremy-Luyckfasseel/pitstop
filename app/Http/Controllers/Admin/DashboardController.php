@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Faq;
 use App\Models\NewsItem;
-use App\Models\Reply;
 use App\Models\Thread;
 use App\Models\User;
 use Inertia\Inertia;
@@ -23,8 +23,8 @@ class DashboardController extends Controller
             'stats' => [
                 'totalUsers' => User::count(),
                 'totalNews' => NewsItem::count(),
+                'totalFaqs' => Faq::count(),
                 'totalThreads' => Thread::count(),
-                'totalReplies' => Reply::count(),
             ],
             'recentUsers' => User::latest()
                 ->take(5)
